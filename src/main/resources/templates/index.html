@@ -13,7 +13,15 @@
         button:hover { background: #e8e8e8; }
         .msg-ok  { color: #2a6a2a; margin-top: 8px; }
         .msg-err { color: #a00; margin-top: 8px; }
-        .disabled { opacity: 0.5; pointer-events: none; }
+        .answer  { background: #f9f9f9; border-left: 3px solid #aaa; padding: 10px 14px; margin: 12px 0; white-space: pre-wrap; }
+        .sources { font-size: 0.85rem; color: #555; margin-top: 6px; }
+        .sources li { margin: 2px 0; }
+        .feedback-form { display: inline; }
+        .thumb { font-size: 1rem; padding: 4px 10px; }
+        .history-item { border-bottom: 1px solid #eee; padding: 12px 0; }
+        .history-item:last-child { border-bottom: none; }
+        .history-q { font-weight: bold; margin-bottom: 4px; }
+        .history-a { white-space: pre-wrap; font-size: 0.9rem; color: #333; }
     </style>
 </head>
 <body>
@@ -30,11 +38,44 @@
     <p class="msg-err" th:if="${ingestError}"   th:text="${ingestError}"></p>
 </div>
 
-<!-- Ask (placeholder — wired in Phase C) -->
-<div class="card disabled">
+<!-- Ask -->
+<div class="card">
     <h2>Ask</h2>
-    <input type="text" placeholder="Type a question…" disabled />
-    <button disabled>Ask</button>
+    <form method="post" th:action="@{/ask}">
+        <input type="text" name="question" placeholder="Type a question…" required />
+        <button type="submit">Ask</button>
+    </form>
+    <p class="msg-err" th:if="${askError}" th:text="${askError}"></p>
+
+    <div th:if="${qaResult}">
+        <div class="answer" th:text="${qaResult.answer}"></div>
+        <ul class="sources">
+            <li th:each="chunk, stat : ${qaResult.chunks}">
+                <span th:text="'[' + (${stat.index} + 1) + '] '"></span>
+                <span th:text="${chunk.sourceName}"></span>
+                <span style="color:#999; font-size:0.8rem;" th:text="' — ' + ${chunk.sourcePath}"></span>
+            </li>
+        </ul>
+        <form class="feedback-form" method="post" th:action="@{/feedback}">
+            <input type="hidden" name="qaId"     th:value="${qaResult.qaId}" />
+            <input type="hidden" name="thumbsUp" value="true" />
+            <button class="thumb" type="submit">👍</button>
+        </form>
+        <form class="feedback-form" method="post" th:action="@{/feedback}">
+            <input type="hidden" name="qaId"     th:value="${qaResult.qaId}" />
+            <input type="hidden" name="thumbsUp" value="false" />
+            <button class="thumb" type="submit">👎</button>
+        </form>
+    </div>
+</div>
+
+<!-- History -->
+<div class="card" th:if="${not #lists.isEmpty(history)}">
+    <h2>History</h2>
+    <div class="history-item" th:each="qa : ${history}">
+        <div class="history-q" th:text="${qa.question}"></div>
+        <div class="history-a" th:text="${qa.answer}"></div>
+    </div>
 </div>
 
 </body>
