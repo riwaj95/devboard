@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DevBoard</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-size: 1.4rem; margin-bottom: 24px; }
+        h2 { font-size: 1rem; margin-bottom: 8px; color: #444; }
+        .card { border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin-bottom: 24px; }
+        input[type=text] { width: 100%; box-sizing: border-box; padding: 8px; font-size: 0.95rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 8px; }
+        button { padding: 8px 16px; font-size: 0.9rem; cursor: pointer; border: 1px solid #888; border-radius: 4px; background: #f5f5f5; }
+        button:hover { background: #e8e8e8; }
+        .msg-ok  { color: #2a6a2a; margin-top: 8px; }
+        .msg-err { color: #a00; margin-top: 8px; }
+        .disabled { opacity: 0.5; pointer-events: none; }
+    </style>
+</head>
+<body>
+<h1>DevBoard</h1>
+
+<!-- Ingest -->
+<div class="card">
+    <h2>Ingest</h2>
+    <form method="post" th:action="@{/ingest}">
+        <input type="text" name="folderPath" placeholder="/Users/me/devboard-corpus" required />
+        <button type="submit">Ingest</button>
+    </form>
+    <p class="msg-ok"  th:if="${ingestMessage}" th:text="${ingestMessage}"></p>
+    <p class="msg-err" th:if="${ingestError}"   th:text="${ingestError}"></p>
+</div>
+
+<!-- Ask (placeholder — wired in Phase C) -->
+<div class="card disabled">
+    <h2>Ask</h2>
+    <input type="text" placeholder="Type a question…" disabled />
+    <button disabled>Ask</button>
+</div>
+
+</body>
+</html>
