@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/devboard
+    username: devboard
+    password: devboard
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+
+server:
+  port: 8080
+
+ollama:
+  base-url: http://localhost:11434
+  embed-model: nomic-embed-text
+  chat-model: llama3.2:3b

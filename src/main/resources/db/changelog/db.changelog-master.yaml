@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-init
+      author: devboard
+      changes:
+        - sqlFile:
+            path: changes/001-init.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true
