@@ -25,6 +25,9 @@ public class Qa {
     @JdbcTypeCode(SqlTypes.ARRAY)
     private UUID[] sourceChunkIds;
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -35,16 +38,18 @@ public class Qa {
 
     public Qa() {}
 
-    public Qa(UUID id, String question, String answer, UUID[] sourceChunkIds) {
+    public Qa(UUID id, String question, String answer, UUID[] sourceChunkIds, UUID userId) {
         this.id = id;
         this.question = question;
         this.answer = answer;
         this.sourceChunkIds = sourceChunkIds;
+        this.userId = userId;
     }
 
     public UUID getId() { return id; }
     public String getQuestion() { return question; }
     public String getAnswer() { return answer; }
     public UUID[] getSourceChunkIds() { return sourceChunkIds; }
+    public UUID getUserId() { return userId; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }

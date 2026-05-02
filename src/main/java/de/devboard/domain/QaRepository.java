@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface QaRepository extends JpaRepository<Qa, UUID> {
-    List<Qa> findAllByOrderByCreatedAtDesc();
+    List<Qa> findAllByUserIdOrderByCreatedAtDesc(UUID userId);
 }

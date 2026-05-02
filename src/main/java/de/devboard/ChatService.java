@@ -28,7 +28,7 @@ public class ChatService {
         this.qaRepository = qaRepository;
     }
 
-    public QaResult ask(String question) {
+    public QaResult ask(String question, UUID userId) {
         List<Chunk> chunks = retrievalService.retrieve(question);
 
         StringBuilder context = new StringBuilder();
@@ -44,7 +44,7 @@ public class ChatService {
         }
 
         UUID[] chunkIds = chunks.stream().map(Chunk::getId).toArray(UUID[]::new);
-        Qa qa = new Qa(UUID.randomUUID(), question, answer, chunkIds);
+        Qa qa = new Qa(UUID.randomUUID(), question, answer, chunkIds, userId);
         qaRepository.save(qa);
 
         return new QaResult(qa.getId(), answer, chunks);

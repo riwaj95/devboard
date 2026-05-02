@@ -17,6 +17,9 @@ public class Feedback {
     @Column(name = "thumbs_up", nullable = false)
     private boolean thumbsUp;
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -27,14 +30,16 @@ public class Feedback {
 
     public Feedback() {}
 
-    public Feedback(UUID id, UUID qaId, boolean thumbsUp) {
+    public Feedback(UUID id, UUID qaId, boolean thumbsUp, UUID userId) {
         this.id = id;
         this.qaId = qaId;
         this.thumbsUp = thumbsUp;
+        this.userId = userId;
     }
 
     public UUID getId() { return id; }
     public UUID getQaId() { return qaId; }
     public boolean isThumbsUp() { return thumbsUp; }
+    public UUID getUserId() { return userId; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
 }

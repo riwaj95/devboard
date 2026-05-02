@@ -8,3 +8,12 @@ databaseChangeLog:
             relativeToChangelogFile: true
             splitStatements: true
             stripComments: true
+  - changeSet:
+      id: 002-add-users
+      author: devboard
+      changes:
+        - sqlFile:
+            path: changes/002-add-users.sql
+            relativeToChangelogFile: true
+            splitStatements: true
+            stripComments: true

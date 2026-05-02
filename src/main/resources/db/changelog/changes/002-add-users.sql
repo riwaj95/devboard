@@ -1,0 +1,10 @@
+CREATE TABLE users (
+  id UUID PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('USER', 'ADMIN')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE qa ADD COLUMN user_id UUID REFERENCES users(id);
+ALTER TABLE feedback ADD COLUMN user_id UUID REFERENCES users(id);

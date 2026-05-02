@@ -22,9 +22,18 @@
         .history-item:last-child { border-bottom: none; }
         .history-q { font-weight: bold; margin-bottom: 4px; }
         .history-a { white-space: pre-wrap; font-size: 0.9rem; color: #333; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid #ddd; font-size: 0.9rem; color: #555; }
+        .topbar form { display: inline; margin: 0; }
+        .topbar button { padding: 4px 12px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
+<div class="topbar">
+    <span th:text="${userEmail}"></span>
+    <form method="post" th:action="@{/logout}">
+        <button type="submit">Logout</button>
+    </form>
+</div>
 <h1>DevBoard</h1>
 
 <!-- Ingest -->
