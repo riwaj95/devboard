@@ -2,12 +2,16 @@ package de.devboard;
 
 import de.devboard.domain.User;
 import de.devboard.domain.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +28,13 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityContextRepository securityContextRepository;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                          SecurityContextRepository securityContextRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.securityContextRepository = securityContextRepository;
     }
 
     @GetMapping("/login")
@@ -43,6 +50,8 @@ public class AuthController {
     @PostMapping("/signup")
     public String signup(@RequestParam String email,
                          @RequestParam String password,
+                         HttpServletRequest request,
+                         HttpServletResponse response,
                          Model model) {
         if (password.length() < 8) {
             model.addAttribute("error", "Password must be at least 8 characters.");
@@ -57,10 +66,14 @@ public class AuthController {
         User user = new User(UUID.randomUUID(), email, passwordEncoder.encode(password), role);
         userRepository.save(user);
 
-        // Log the new user in immediately
+        var userDetails = new org.springframework.security.core.userdetails.User(
+                email, "", List.of(new SimpleGrantedAuthority("ROLE_" + role)));
         var auth = new UsernamePasswordAuthenticationToken(
-                email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
-        SecurityContextHolder.getContext().setAuthentication(auth);
+                userDetails, null, userDetails.getAuthorities());
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(auth);
+        SecurityContextHolder.setContext(context);
+        securityContextRepository.saveContext(context, request, response);
 
         return "redirect:/";
     }
