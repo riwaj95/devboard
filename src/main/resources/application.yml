@@ -18,4 +18,4 @@ server:
 ollama:
   base-url: http://localhost:11434
   embed-model: nomic-embed-text
-  chat-model: qwen2.5:7b-instruct
+  chat-model: llama3.2:3b
