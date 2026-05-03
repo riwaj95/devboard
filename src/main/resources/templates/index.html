@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>DevBoard</title>
@@ -36,8 +37,14 @@
 </div>
 <h1>DevBoard</h1>
 
-<!-- Ingest -->
-<div class="card">
+<!-- Knowledge base panel (populated in Phase 2) -->
+<div class="card" id="corpus-panel">
+    <h2>Knowledge base</h2>
+    <p style="color:#888;">No knowledge base yet. An admin needs to ingest a folder before you can ask questions.</p>
+</div>
+
+<!-- Ingest — admins only -->
+<div class="card" sec:authorize="hasRole('ADMIN')">
     <h2>Ingest</h2>
     <form method="post" th:action="@{/ingest}">
         <input type="text" name="folderPath" placeholder="/Users/me/devboard-corpus" required />
