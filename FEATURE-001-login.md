@@ -102,3 +102,50 @@ Do not add other tests. The auth boundary is the one thing we MUST test.
 8. Logout, sign up second user `user@test.com`. Notice "Ingest" still visible but clicking returns 403 (this is fine for now)
 9. Second user asks a different question. They see only their question in history, not the admin's
 10. `mvn verify` passes
+
+## Corpus visibility (added requirement)
+
+The corpus is shared across all users. Admins ingest, everyone queries the same data. The UI must make this clear.
+
+### New: corpus_state table
+A single-row table tracking the current corpus state.
+
+```sql
+CREATE TABLE corpus_state (
+  id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),  -- enforces single row
+  source_path TEXT,
+  file_count INT NOT NULL DEFAULT 0,
+  chunk_count INT NOT NULL DEFAULT 0,
+  last_ingested_at TIMESTAMPTZ,
+  last_ingested_by_user_id UUID REFERENCES users(id)
+);
+INSERT INTO corpus_state (id) VALUES (1);
+```
+
+This goes in the `002-add-users.sql` changeset (single migration is simpler than splitting it).
+
+### IngestionService updates
+After a successful ingest, update the `corpus_state` row with:
+- the source_path that was ingested
+- the file_count and chunk_count
+- last_ingested_at = NOW()
+- last_ingested_by_user_id = current user
+
+### Index page (templates/index.html) updates
+At the top of the page (above the chat), show a "Knowledge base" panel that displays:
+- If `corpus_state.last_ingested_at IS NULL`: "No knowledge base yet. An admin needs to ingest a folder before you can ask questions."
+- Otherwise: 
+  - "Knowledge base: <source_path>"
+  - "<chunk_count> chunks from <file_count> files"
+  - "Last updated <relative time> ago by <admin email>"
+
+### Role-based UI
+- For admins: show the ingest form (path input + Ingest button)
+- For regular users: hide the ingest form entirely. Show only the corpus info panel and the question form.
+- Use Thymeleaf's `sec:authorize="hasRole('ADMIN')"` from `thymeleaf-extras-springsecurity6` — add this dependency.
+
+### Question form gating
+If `corpus_state.last_ingested_at IS NULL`, the question form is disabled with a message: "No docs ingested yet. Ask your admin to set up the knowledge base."
+
+### Updated dependency
+Add: `org.thymeleaf.extras:thymeleaf-extras-springsecurity6` (no version — managed by Spring Boot parent)
