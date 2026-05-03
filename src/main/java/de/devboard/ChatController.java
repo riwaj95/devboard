@@ -28,15 +28,17 @@ public class ChatController {
     private final QaRepository qaRepository;
     private final FeedbackRepository feedbackRepository;
     private final UserRepository userRepository;
+    private final CorpusStateService corpusStateService;
 
     public ChatController(IngestionService ingestionService, ChatService chatService,
                           QaRepository qaRepository, FeedbackRepository feedbackRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository, CorpusStateService corpusStateService) {
         this.ingestionService = ingestionService;
         this.chatService = chatService;
         this.qaRepository = qaRepository;
         this.feedbackRepository = feedbackRepository;
         this.userRepository = userRepository;
+        this.corpusStateService = corpusStateService;
     }
 
     @GetMapping("/")
@@ -44,23 +46,26 @@ public class ChatController {
         User user = currentUser(principal);
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("history", qaRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()));
+        addCorpusState(model);
         return "index";
     }
 
     @PostMapping("/ingest")
     public String ingest(@RequestParam String folderPath,
                          @AuthenticationPrincipal UserDetails principal, Model model) {
+        User user = currentUser(principal);
         try {
             IngestionService.IngestResult result = ingestionService.ingest(folderPath);
+            corpusStateService.updateAfterIngest(folderPath, result.fileCount(), result.chunkCount(), user.getId());
             model.addAttribute("ingestMessage",
                     "Ingested " + result.chunkCount() + " chunks from " + result.fileCount() + " files.");
         } catch (Exception e) {
             log.error("Ingestion failed", e);
             model.addAttribute("ingestError", "Something went wrong: " + e.getMessage());
         }
-        User user = currentUser(principal);
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("history", qaRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()));
+        addCorpusState(model);
         return "index";
     }
 
@@ -77,6 +82,7 @@ public class ChatController {
         }
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("history", qaRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()));
+        addCorpusState(model);
         return "index";
     }
 
@@ -91,7 +97,15 @@ public class ChatController {
         }
         model.addAttribute("userEmail", user.getEmail());
         model.addAttribute("history", qaRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()));
+        addCorpusState(model);
         return "index";
+    }
+
+    private void addCorpusState(Model model) {
+        corpusStateService.getCorpusState().ifPresent(state -> {
+            model.addAttribute("corpusState", state);
+            model.addAttribute("corpusAdminEmail", corpusStateService.getLastIngestedByEmail(state));
+        });
     }
 
     private User currentUser(UserDetails principal) {

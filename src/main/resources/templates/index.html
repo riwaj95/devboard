@@ -37,10 +37,18 @@
 </div>
 <h1>DevBoard</h1>
 
-<!-- Knowledge base panel (populated in Phase 2) -->
-<div class="card" id="corpus-panel">
+<!-- Knowledge base panel -->
+<div class="card">
     <h2>Knowledge base</h2>
-    <p style="color:#888;">No knowledge base yet. An admin needs to ingest a folder before you can ask questions.</p>
+    <div th:if="${corpusState != null and corpusState.lastIngestedAt != null}">
+        <p><strong th:text="${corpusState.sourcePath}"></strong></p>
+        <p th:text="${corpusState.chunkCount} + ' chunks from ' + ${corpusState.fileCount} + ' files'"></p>
+        <p style="color:#888; font-size:0.85rem;">
+            Last updated by <span th:text="${corpusAdminEmail}"></span>
+        </p>
+    </div>
+    <p th:if="${corpusState == null or corpusState.lastIngestedAt == null}"
+       style="color:#888;">No knowledge base yet. An admin needs to ingest a folder before you can ask questions.</p>
 </div>
 
 <!-- Ingest — admins only -->
@@ -57,7 +65,10 @@
 <!-- Ask -->
 <div class="card">
     <h2>Ask</h2>
-    <form method="post" th:action="@{/ask}">
+    <p th:if="${corpusState == null or corpusState.lastIngestedAt == null}"
+       style="color:#888;">No docs ingested yet. Ask your admin to set up the knowledge base.</p>
+    <form method="post" th:action="@{/ask}"
+          th:if="${corpusState != null and corpusState.lastIngestedAt != null}">
         <input type="text" name="question" placeholder="Type a question…" required />
         <button type="submit">Ask</button>
     </form>
